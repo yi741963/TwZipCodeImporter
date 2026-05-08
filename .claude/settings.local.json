@@ -3,8 +3,7 @@
     "allow": [
       "Bash(dotnet new *)",
       "Bash(dotnet add *)",
-      "Bash(dotnet run *)",
-      "Bash(sqlcmd -S 'Ethan-NoteBook\\\\SQLEXPRESS' -d itms2-AZ-db -E -Q ' *)"
+      "Bash(dotnet run *)"
     ]
   }
 }
