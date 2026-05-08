@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="TwZipCodeImporter.Tests/TwZipCodeImporter.Tests.csproj" />
+  <Project Path="TwZipCodeImporter.WinForms/TwZipCodeImporter.WinForms.csproj" />
+  <Project Path="TwZipCodeImporter/TwZipCodeImporter.csproj" />
+</Solution>

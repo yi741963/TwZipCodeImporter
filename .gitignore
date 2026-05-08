@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+
+# appsettings — 含連線字串，不上傳；請複製 appsettings.example.json 並填入真實值
+appsettings.json
+
+# Import warnings log
+import_warnings.log
+
+# VS / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# OS
+Thumbs.db
+.DS_Store
