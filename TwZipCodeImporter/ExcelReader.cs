@@ -12,9 +12,6 @@ public static class ExcelReader
         string directory,
         List<string> warnings)
     {
-        // ExcelDataReader 在非 Windows 環境需要此設定，Windows 下也無害
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
         var files = Directory.GetFiles(directory, "*.xls")
             .Concat(Directory.GetFiles(directory, "*.xlsx"))
             .OrderBy(f => f)
@@ -22,6 +19,25 @@ public static class ExcelReader
 
         if (files.Length == 0)
             throw new FileNotFoundException($"在 {directory} 找不到任何 .xls / .xlsx 檔案");
+
+        return ReadFiles(files, warnings);
+    }
+
+    public static IEnumerable<(Zone3Plus3Row Row, int FileRowIndex, string FileName)> ReadFiles(
+        IEnumerable<string> filePaths,
+        List<string> warnings)
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+        var files = filePaths
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Where(p => p.EndsWith(".xls", StringComparison.OrdinalIgnoreCase)
+                     || p.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => p)
+            .ToArray();
+
+        if (files.Length == 0)
+            throw new FileNotFoundException("沒有可讀取的 .xls / .xlsx 檔案");
 
         foreach (var file in files)
         {
@@ -37,7 +53,7 @@ public static class ExcelReader
             {
                 ConfigureDataTable = _ => new ExcelDataTableConfiguration
                 {
-                    UseHeaderRow = true   // 第 1 列為標題，自動跳過
+                    UseHeaderRow = true
                 }
             });
 
@@ -47,17 +63,16 @@ public static class ExcelReader
             for (int i = 0; i < sheet.Rows.Count; i++)
             {
                 var row = sheet.Rows[i];
-                int excelRowNum = i + 2; // 1-based，+1 標題列，+1 資料列從第2列起
+                int excelRowNum = i + 2;
 
-                var cityName  = GetStr(row, 0);
-                var areaName  = GetStr(row, 1);
-                var code6Str  = GetStr(row, 2);
-                var roadName  = GetStr(row, 3);
-                var rangeRaw  = GetStr(row, 4);
+                var cityName   = GetStr(row, 0);
+                var areaName   = GetStr(row, 1);
+                var code6Str   = GetStr(row, 2);
+                var roadName   = GetStr(row, 3);
+                var rangeRaw   = GetStr(row, 4);
                 var postOffice = GetStr(row, 5);
-                var bulkNote  = GetStr(row, 6);
+                var bulkNote   = GetStr(row, 6);
 
-                // 跳過空白列
                 if (string.IsNullOrWhiteSpace(cityName) && string.IsNullOrWhiteSpace(roadName))
                     continue;
 
@@ -67,7 +82,6 @@ public static class ExcelReader
                     continue;
                 }
 
-                // 空白投遞範圍視同「全」
                 if (string.IsNullOrWhiteSpace(rangeRaw))
                     rangeRaw = "全";
 
@@ -102,7 +116,6 @@ public static class ExcelReader
         if (col >= row.Table.Columns.Count) return "";
         var v = row[col];
         if (v == null || v == DBNull.Value) return "";
-        // 郵遞區號欄位有時被讀成 double（如 104091.0），先轉數字再取整數字串
         if (v is double d) return ((long)d).ToString();
         return v.ToString()?.Trim() ?? "";
     }
